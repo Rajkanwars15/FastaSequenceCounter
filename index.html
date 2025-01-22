@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FASTA Sequence Counter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        textarea, input, button {
+            width: 100%;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<h1>FASTA Sequence Counter</h1>
+<p>Upload a FASTA file and provide sequences to count:</p>
+<form id="fastaForm">
+    <label for="fastaFile">FASTA File:</label>
+    <input type="file" id="fastaFile" accept=".fasta,.txt" required>
+
+    <label for="sequences">Sequences to Count (comma-separated):</label>
+    <textarea id="sequences" rows="5" required>ACGAA,ACGTT,ACGGG,ACGCC</textarea>
+
+    <button type="button" id="countButton">Count Sequences</button>
+</form>
+
+<h2>Results</h2>
+<div id="results"></div>
+
+<script>
+    document.getElementById('countButton').addEventListener('click', async () => {
+        const fastaFile = document.getElementById('fastaFile').files[0];
+        const sequencesInput = document.getElementById('sequences').value.trim();
+        const resultsDiv = document.getElementById('results');
+
+        if (!fastaFile || !sequencesInput) {
+            alert('Please upload a FASTA file and provide sequences.');
+            return;
+        }
+
+        // Read the FASTA file
+        const fileText = await fastaFile.text();
+
+        // Remove newlines and extra spaces
+        const fastaContent = fileText.replace(/\n/g, '').trim();
+
+        // Parse sequences
+        const sequences = sequencesInput.split(',').map(seq => seq.trim());
+
+        // Count occurrences
+        const counts = {};
+        sequences.forEach(seq => {
+            counts[seq] = (fastaContent.match(new RegExp(seq, 'g')) || []).length;
+        });
+
+        // Display results
+        let tableHtml = `<table><tr><th>Sequence</th><th>Count</th></tr>`;
+        for (const [seq, count] of Object.entries(counts)) {
+            tableHtml += `<tr><td>${seq}</td><td>${count}</td></tr>`;
+        }
+        tableHtml += `</table>`;
+
+        resultsDiv.innerHTML = tableHtml;
+    });
+</script>
+</body>
+</html>
